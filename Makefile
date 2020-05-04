@@ -1,7 +1,7 @@
 # Change the configuration here.
 # Include your useid/name as part of IMAGENAME to avoid conflicts
-IMAGENAME = docker-test
-CONFIG    = basic
+IMAGENAME = docker-imagesim
+CONFIG    = imagesim
 COMMAND   = bash
 DISKS     = -v /data/deep/data:/data:ro -v $(PWD):/project
 USERID    = $(shell id -u)
@@ -17,6 +17,8 @@ SSHFSOPTIONS = --cap-add SYS_ADMIN --device /dev/fuse
 
 USERCONFIG   = --build-arg user=$(USERNAME) --build-arg uid=$(USERID) --build-arg gid=$(GROUPID)
 
+.PHONY: .docker simulate
+
 .docker: docker/Dockerfile-$(CONFIG)
 	docker build $(USERCONFIG) -t $(USERNAME)-$(IMAGENAME) -f docker/Dockerfile-$(CONFIG) docker
 
@@ -26,6 +28,9 @@ RUNCMD=docker run $(RUNTIME) --rm --user $(USERID):$(GROUPID) $(PORT) $(SSHFSOPT
 # Replace 'bash' with the command you want to do
 default: .docker
 	$(RUNCMD) $(COMMAND)
+
+simulate: .docker
+	$(RUNCMD) ./imagesim.sh
 
 # requires CONFIG=jupyter
 jupyter:
