@@ -81,8 +81,15 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
             alphainv = ImageOps.invert(alpha)
             mask.paste(alpha, (posx,posy), mask=alpha)
             for m in masklist:
-                # how to limit to the visible parts of m? (avoid silhouettes from low but nonzero alpha values)
+                mm = m.split()[0]  # extract mask, use Red as proxy for alpha
+                minv = ImageOps.invert(mm)
+
+                # Obscure by pasting inverse mask (note silhouette from half-values of alpha)
                 m.paste(alphainv, (posx,posy), mask=alpha)
+
+                # color all black outside of the existing fish
+                tmp = Image.new("RGBA", m.size, (0,0,0,255))
+                m.paste(tmp, mask=minv)
             masklist.append(mask)
 
         path_to_image = os.path.join(output_dir, filename + '.png')
