@@ -23,7 +23,8 @@ p.add_argument('-e', default = 6
                , help='max number of elements per image')
 p.add_argument('-o'
                , help='directory to store generated images')
-
+p.add_argument('-m', '--masks', default = False
+               , help='output per-instance masks')
 args = p.parse_args()
 
 if args.path_to_directory is not None:
@@ -38,5 +39,5 @@ n = int(args.n)
 
 for i in range(1,int(n)+1):
     mkimage(args.o+'_%d' % int(i), objects, names, backgrounds,
-            output_dir=args.o, maxobjs=args.e, single=args.single)
+            output_dir=args.o, maxobjs=args.e, single=args.single, masks=args.masks)
 

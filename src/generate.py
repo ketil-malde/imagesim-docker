@@ -6,7 +6,7 @@ if sys.version_info < (3, 0):
 
 import os
 import random
-from PIL import Image
+from PIL import Image, ImageOps
 from math import floor, sqrt
 
 dict = {"mackerel": 35/35, "bluewhiting": 27/35, "herring": 33/35, "krill": 1/35, "lanternfish": 9/35}
@@ -28,7 +28,7 @@ def initialize(backgrounds_dir, classes_dir):
     return objs, class_names, bgs
 
 # Simulate an image
-def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=False):
+def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=False, masks=False):
     """
     Generates a synthetic image consisting of a random number of objects pasted on a random background
     and a text file with coordinates of each object, along with class name.
@@ -41,6 +41,7 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
     :param maxobjs: Maximum number of objects generated in a given image
     :param output_dir: Output directory, default="images_out"
     :param single: Boolean indicating whether image contains a single species (True) or not
+    :param masks: Boolean indicating whether to output instance masks
 
     :Returns: png image and txt file
     """
@@ -52,6 +53,7 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
     num_obj= random.randint(1, maxobjs)   # Randomly chooses a number of objects (max no defined by user)
     scale_list= [i/100 for i in random.sample(range(80,200), num_obj)]
     scale_list.sort()
+    masklist = []
 
     for c in range(0, num_obj):
 
@@ -71,7 +73,18 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
         imx,imy = im.size
         posx = random.randint(-floor(3*obj.size[0]/4),imx-floor(obj.size[0]/4))
         posy = random.randint(-floor(3*obj.size[1]/4),imy-floor(obj.size[1]/4))
-        im.paste(obj,(posx,posy),obj)
+        im.paste(obj, box=(posx,posy), mask=obj)
+        # mask.paste obj only alpha channel
+        if masks:
+            mask = Image.new("RGBA", im.size, (0,0,0,255))
+            alpha = obj.split()[-1]
+            alphainv = ImageOps.invert(alpha)
+            mask.paste(alpha, (posx,posy), mask=alpha)
+            for m in masklist:
+                # how to limit to the visible parts of m? (avoid silhouettes from low but nonzero alpha values)
+                m.paste(alphainv, (posx,posy), mask=alpha)
+            masklist.append(mask)
+
         path_to_image = os.path.join(output_dir, filename + '.png')
         log = log + ['{},{},{},{},{},{}\n'.format(path_to_image,
                                                   max(0, posx),
@@ -83,6 +96,9 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
     im.save(os.path.join(output_dir,filename+'.png'))
     with open(os.path.join(output_dir,filename+'.txt'),'w') as f:
         for l in log: f.write(l)
+    # save the masks
+    for i,m in enumerate(masklist):
+         m.save(os.path.join(output_dir,filename+'_mask_'+str(i)+'.png'))
 
 # Testing
 def test():
