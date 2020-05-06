@@ -3,7 +3,7 @@
 IMAGENAME = docker-imagesim
 CONFIG    = imagesim
 COMMAND   = bash
-DISKS     = -v /data/deep/data:/data:ro -v $(PWD):/project
+DISKS     = -v $(PWD):/project
 USERID    = $(shell id -u)
 GROUPID   = $(shell id -g)
 USERNAME  = $(shell whoami)
@@ -17,7 +17,7 @@ SSHFSOPTIONS = --cap-add SYS_ADMIN --device /dev/fuse
 
 USERCONFIG   = --build-arg user=$(USERNAME) --build-arg uid=$(USERID) --build-arg gid=$(GROUPID)
 
-.PHONY: .docker simulate
+.PHONY: .docker simulate data
 
 .docker: docker/Dockerfile-$(CONFIG)
 	docker build $(USERCONFIG) -t $(USERNAME)-$(IMAGENAME) -f docker/Dockerfile-$(CONFIG) docker
@@ -29,8 +29,16 @@ RUNCMD=docker run $(RUNTIME) --rm --user $(USERID):$(GROUPID) $(PORT) $(SSHFSOPT
 default: .docker
 	$(RUNCMD) $(COMMAND)
 
-simulate: .docker
+simulate: data imagesim.sh .docker
 	$(RUNCMD) ./imagesim.sh
+
+data: fishDatasetSimulationAlgo .docker
+
+fishDatasetSimulationAlgo: fishDatasetSimulationAlgo.zip
+	$(RUNCMD) unzip $<
+
+fishDatasetSimulationAlgo.zip:
+	$(RUNCMD) wget ftp://ftp.nmdc.no/nmdc/IMR/MachineLearning/fishDatasetSimulationAlgo.zip
 
 # requires CONFIG=jupyter
 jupyter:
