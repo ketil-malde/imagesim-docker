@@ -29,10 +29,10 @@ RUNCMD=docker run $(RUNTIME) --rm --user $(USERID):$(GROUPID) $(PORT) $(SSHFSOPT
 default: .docker
 	$(RUNCMD) $(COMMAND)
 
-simulate: data imagesim.sh .docker
+simulate: .docker data imagesim.sh
 	$(RUNCMD) ./imagesim.sh
 
-data: fishDatasetSimulationAlgo .docker
+data: .docker fishDatasetSimulationAlgo
 
 fishDatasetSimulationAlgo: fishDatasetSimulationAlgo.zip
 	$(RUNCMD) unzip $<
