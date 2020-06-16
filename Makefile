@@ -9,6 +9,7 @@ GROUPID   = $(shell id -g)
 USERNAME  = $(shell whoami)
 PORT      = -p 8888:8888
 RUNTIME   =
+NETWORK   = --network host
 # --runtime=nvidia 
 # No need to change anything below this line
 
@@ -20,10 +21,10 @@ USERCONFIG   = --build-arg user=$(USERNAME) --build-arg uid=$(USERID) --build-ar
 .PHONY: .docker simulate data
 
 .docker: docker/Dockerfile-$(CONFIG)
-	docker build $(USERCONFIG) -t $(USERNAME)-$(IMAGENAME) -f docker/Dockerfile-$(CONFIG) docker
+	docker build $(USERCONFIG) $(NETWORK) -t $(USERNAME)-$(IMAGENAME) -f docker/Dockerfile-$(CONFIG) docker
 
 # Using -it for interactive use
-RUNCMD=docker run $(RUNTIME) --rm --user $(USERID):$(GROUPID) $(PORT) $(SSHFSOPTIONS) $(DISKS) -it $(USERNAME)-$(IMAGENAME)
+RUNCMD=docker run $(RUNTIME) $(NETWORK) --rm --user $(USERID):$(GROUPID) $(PORT) $(SSHFSOPTIONS) $(DISKS) -it $(USERNAME)-$(IMAGENAME)
 
 # Replace 'bash' with the command you want to do
 default: .docker
