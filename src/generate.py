@@ -105,7 +105,7 @@ def mkimage(filename, objs, names, bgs, maxobjs, output_dir="images_out",single=
         for l in log: f.write(l)
     # save the masks
     for i,m in enumerate(masklist):
-         m.save(os.path.join(output_dir,filename+'_mask_'+str(i)+'.png'))
+         m.save(os.path.join(output_dir,'mask_'+filename+'_'+str(i)+'.png'))
 
 # Testing
 def test():
