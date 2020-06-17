@@ -32,6 +32,6 @@ objects, names, backgrounds = initialize(backgrounds_dir, classes_dir)
 n = int(args.n)
 
 for i in range(1,int(n)+1):
-    mkimage(args.o+'_%d' % int(i), objects, names, backgrounds,
+    mkimage(args.t+'_%d' % int(i), objects, names, backgrounds,
             output_dir=args.o, maxobjs=args.e, single=args.single, masks=args.masks)
 
