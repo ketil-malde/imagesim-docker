@@ -30,6 +30,16 @@ for d in sim-201?; do
     done
 done
 
+# add csv files (for RetinaNet)
+cat sim-201?/*.txt > train.csv
+cat validation/sim-201?/*.txt > validation/validation.csv
+cat > classes.csv << EOF
+herring,0
+mackerel,1
+bluewhiting,2
+lanternfish,3
+EOF
+
 # link to test data
 for YEAR in 2017 2018; do
     ln -s fishDatasetSimulationAlgo/fish_dataset/$YEAR/test test-$YEAR
