@@ -30,6 +30,11 @@ RUNCMD=docker run $(RUNTIME) $(NETWORK) --rm --user $(USERID):$(GROUPID) $(PORT)
 default: .docker
 	$(RUNCMD) $(COMMAND)
 
+clean:
+	mkdir older
+	mv old sim-2017 sim-2018 validation test older
+	mv older old
+
 simulate: .docker data imagesim.sh
 	$(RUNCMD) ./imagesim.sh
 
